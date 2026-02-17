@@ -1,0 +1,86 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Profile {
+  id              Int            @id @default(autoincrement())
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  name            String         @unique
+  description     String?
+  usage           String?
+  drawingUrl      String?
+  photoUrl        String?
+  logoUrl         String?
+  dimensions      String?
+  weightPerMeter  Float?
+  material        String?
+  lengthMm        Int?
+  status          Status         @default(AVAILABLE)
+
+  supplierId      Int
+  supplier        Supplier       @relation(fields: [supplierId], references: [id])
+
+  applications    Application[]  @relation("ApplicationToProfile")
+  crossSections   CrossSection[] @relation("CrossSectionToProfile")
+}
+
+model Supplier {
+  id              Int       @id @default(autoincrement())
+  name            String    @unique
+  address         String?
+  contactPerson   String?
+  email           String?
+  phone           String?
+  website         String?
+  profiles        Profile[]
+}
+
+model Application {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  profiles  Profile[] @relation("ApplicationToProfile")
+}
+
+model CrossSection {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  profiles  Profile[] @relation("CrossSectionToProfile")
+}
+
+model UserAccess {
+  id          Int             @id @default(autoincrement())
+  clerkUserId String          @unique
+  role        AppRole         @default(USER)
+  permissions AppPermission[] @default([VIEW_ADMIN])
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+}
+
+enum Status {
+  AVAILABLE
+  IN_DEVELOPMENT
+  NOT_AVAILABLE
+}
+
+enum AppRole {
+  ADMIN
+  MANAGER
+  USER
+}
+
+enum AppPermission {
+  VIEW_ADMIN
+  PROFILES_MANAGE
+  SUPPLIERS_MANAGE
+  CATEGORIES_MANAGE
+  USERS_MANAGE
+}

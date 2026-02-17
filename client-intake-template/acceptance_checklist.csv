@@ -1,0 +1,9 @@
+item_id,requirement,priority,accepted_by_client,acceptance_date,comments
+AC001,Public home page shows categories and profile counts,High,FALSE,,
+AC002,Profile search/filter works by text and selected fields,High,FALSE,,
+AC003,Profile detail page shows technical data and supplier contact,High,FALSE,,
+AC004,Admin login/logout works,High,FALSE,,
+AC005,Admin can CRUD profiles/suppliers/categories,High,FALSE,,
+AC006,Drawing and image upload works,High,FALSE,,
+AC007,Responsive layout works on desktop/tablet/mobile,Medium,FALSE,,
+AC008,German and English content readiness confirmed,Medium,FALSE,,
