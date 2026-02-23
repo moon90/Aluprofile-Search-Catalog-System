@@ -5,7 +5,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { AppPermission, AppRole } from '@prisma/client';
+import { AppPermission, AppRole } from '../../node_modules/.prisma/client';
 import type { Request } from 'express';
 import { AuthService } from './auth.service';
 import {

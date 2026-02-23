@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '../../node_modules/.prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
 type ProfileFilters = {

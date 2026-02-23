@@ -8,6 +8,7 @@ import {
   ParseIntPipe,
   Post,
   Put,
+  Query,
   Req,
   UploadedFile,
   UseGuards,
@@ -20,7 +21,7 @@ import { randomUUID } from 'node:crypto';
 import type { Request } from 'express';
 import { AdminGuard } from '../auth/admin.guard';
 import { AdminService, ProfileInput } from './admin.service';
-import { AppPermission, AppRole, Status } from '@prisma/client';
+import { AppPermission, AppRole, Status } from '../../node_modules/.prisma/client';
 import {
   RequirePermissions,
   RequireRoles,
@@ -73,6 +74,7 @@ function parseProfileBody(
 
 @Controller('admin')
 @UseGuards(AdminGuard)
+@RequireRoles(AppRole.ADMIN)
 @RequirePermissions(AppPermission.VIEW_ADMIN)
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
@@ -83,14 +85,12 @@ export class AdminController {
   }
 
   @Get('user-access')
-  @RequireRoles(AppRole.ADMIN)
   @RequirePermissions(AppPermission.USERS_MANAGE)
   listUserAccess() {
     return this.adminService.listUserAccess();
   }
 
   @Post('user-access')
-  @RequireRoles(AppRole.ADMIN)
   @RequirePermissions(AppPermission.USERS_MANAGE)
   upsertUserAccess(
     @Body()
@@ -111,13 +111,61 @@ export class AdminController {
   }
 
   @Delete('user-access/:clerkUserId')
-  @RequireRoles(AppRole.ADMIN)
   @RequirePermissions(AppPermission.USERS_MANAGE)
   deleteUserAccess(@Param('clerkUserId') clerkUserId: string) {
     if (!clerkUserId?.trim()) {
       throw new BadRequestException('clerkUserId is required');
     }
     return this.adminService.deleteUserAccess(clerkUserId.trim());
+  }
+
+  @Get('clerk-users')
+  @RequirePermissions(AppPermission.USERS_MANAGE)
+  listClerkUsers(@Query('query') query?: string) {
+    return this.adminService.listClerkUsers(query);
+  }
+
+  @Post('clerk-users')
+  @RequirePermissions(AppPermission.USERS_MANAGE)
+  createClerkUser(
+    @Body()
+    body: {
+      email: string;
+      password: string;
+      firstName?: string;
+      lastName?: string;
+      username?: string;
+    },
+  ) {
+    return this.adminService.createClerkUser(body);
+  }
+
+  @Put('clerk-users/:userId')
+  @RequirePermissions(AppPermission.USERS_MANAGE)
+  updateClerkUser(
+    @Param('userId') userId: string,
+    @Body()
+    body: {
+      email?: string;
+      password?: string;
+      firstName?: string;
+      lastName?: string;
+      username?: string;
+    },
+  ) {
+    if (!userId?.trim()) {
+      throw new BadRequestException('userId is required');
+    }
+    return this.adminService.updateClerkUser(userId.trim(), body);
+  }
+
+  @Delete('clerk-users/:userId')
+  @RequirePermissions(AppPermission.USERS_MANAGE)
+  deleteClerkUser(@Param('userId') userId: string) {
+    if (!userId?.trim()) {
+      throw new BadRequestException('userId is required');
+    }
+    return this.adminService.deleteClerkUser(userId.trim());
   }
 
   @Get('suppliers')
@@ -277,5 +325,11 @@ export class AdminController {
       mimetype: file.mimetype,
       size: file.size,
     };
+  }
+
+  @Post('demo-data/seed')
+  @RequirePermissions(AppPermission.PROFILES_MANAGE)
+  seedDemoData() {
+    return this.adminService.seedDemoData();
   }
 }

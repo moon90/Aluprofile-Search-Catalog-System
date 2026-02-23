@@ -1,4 +1,4 @@
-import { AppPermission, AppRole } from '@prisma/client';
+import { AppPermission, AppRole } from '../../node_modules/.prisma/client';
 
 export type AuthContext = {
   clerkUserId: string;
@@ -6,4 +6,3 @@ export type AuthContext = {
   appPermissions: AppPermission[];
   source: 'database' | 'bootstrap';
 };
-
