@@ -5,14 +5,18 @@ import { AppPermission, AppRole, Status } from '../../node_modules/.prisma/clien
 
 export type ProfileInput = {
   name?: string;
+  nameDe?: string;
   description?: string;
+  descriptionDe?: string;
   usage?: string;
+  usageDe?: string;
   drawingUrl?: string;
   photoUrl?: string;
   logoUrl?: string;
   dimensions?: string;
   weightPerMeter?: number;
   material?: string;
+  materialDe?: string;
   lengthMm?: number;
   status?: Status;
   supplierId?: number;
@@ -184,6 +188,7 @@ export class AdminService {
 
   createSupplier(data: {
     name: string;
+    nameDe?: string;
     address?: string;
     contactPerson?: string;
     email?: string;
@@ -197,6 +202,7 @@ export class AdminService {
     id: number,
     data: Partial<{
       name: string;
+      nameDe?: string;
       address?: string;
       contactPerson?: string;
       email?: string;
@@ -218,12 +224,12 @@ export class AdminService {
     });
   }
 
-  createApplication(name: string) {
-    return this.prisma.application.create({ data: { name } });
+  createApplication(input: { name: string; nameDe?: string }) {
+    return this.prisma.application.create({ data: input });
   }
 
-  updateApplication(id: number, name: string) {
-    return this.prisma.application.update({ where: { id }, data: { name } });
+  updateApplication(id: number, input: { name: string; nameDe?: string }) {
+    return this.prisma.application.update({ where: { id }, data: input });
   }
 
   deleteApplication(id: number) {
@@ -237,12 +243,12 @@ export class AdminService {
     });
   }
 
-  createCrossSection(name: string) {
-    return this.prisma.crossSection.create({ data: { name } });
+  createCrossSection(input: { name: string; nameDe?: string }) {
+    return this.prisma.crossSection.create({ data: input });
   }
 
-  updateCrossSection(id: number, name: string) {
-    return this.prisma.crossSection.update({ where: { id }, data: { name } });
+  updateCrossSection(id: number, input: { name: string; nameDe?: string }) {
+    return this.prisma.crossSection.update({ where: { id }, data: input });
   }
 
   deleteCrossSection(id: number) {
@@ -267,14 +273,18 @@ export class AdminService {
     return this.prisma.profile.create({
       data: {
         name: input.name,
+        nameDe: input.nameDe,
         description: input.description,
+        descriptionDe: input.descriptionDe,
         usage: input.usage,
+        usageDe: input.usageDe,
         drawingUrl: input.drawingUrl,
         photoUrl: input.photoUrl,
         logoUrl: input.logoUrl,
         dimensions: input.dimensions,
         weightPerMeter: input.weightPerMeter,
         material: input.material,
+        materialDe: input.materialDe,
         lengthMm: input.lengthMm,
         status: input.status ?? Status.AVAILABLE,
         supplier: { connect: { id: input.supplierId } },
@@ -306,14 +316,18 @@ export class AdminService {
       where: { id },
       data: {
         name: input.name,
+        nameDe: input.nameDe,
         description: input.description,
+        descriptionDe: input.descriptionDe,
         usage: input.usage,
+        usageDe: input.usageDe,
         drawingUrl: input.drawingUrl,
         photoUrl: input.photoUrl,
         logoUrl: input.logoUrl,
         dimensions: input.dimensions,
         weightPerMeter: input.weightPerMeter,
         material: input.material,
+        materialDe: input.materialDe,
         lengthMm: input.lengthMm,
         status: input.status,
         supplier: input.supplierId
@@ -347,6 +361,7 @@ export class AdminService {
       this.prisma.supplier.upsert({
         where: { name: 'Aluzone GmbH' },
         update: {
+          nameDe: 'Aluzone GmbH',
           address: 'Grosse Stadtgutgasse 29/12, A-1020 Wien',
           contactPerson: 'Oliver Kascha',
           phone: '+43 699 122 35 850',
@@ -355,6 +370,7 @@ export class AdminService {
         },
         create: {
           name: 'Aluzone GmbH',
+          nameDe: 'Aluzone GmbH',
           address: 'Grosse Stadtgutgasse 29/12, A-1020 Wien',
           contactPerson: 'Oliver Kascha',
           phone: '+43 699 122 35 850',
@@ -365,12 +381,14 @@ export class AdminService {
       this.prisma.supplier.upsert({
         where: { name: 'Tepro Tec' },
         update: {
+          nameDe: 'Tepro Tec',
           contactPerson: 'Sales Team',
           phone: '+43 676 123 4567',
           website: 'https://tepro.example',
         },
         create: {
           name: 'Tepro Tec',
+          nameDe: 'Tepro Tec',
           contactPerson: 'Sales Team',
           phone: '+43 676 123 4567',
           website: 'https://tepro.example',
@@ -379,12 +397,14 @@ export class AdminService {
       this.prisma.supplier.upsert({
         where: { name: 'DasaTech' },
         update: {
+          nameDe: 'DasaTech',
           contactPerson: 'Operations Desk',
           phone: '+43 678 590 9989',
           website: 'https://dasatech.example',
         },
         create: {
           name: 'DasaTech',
+          nameDe: 'DasaTech',
           contactPerson: 'Operations Desk',
           phone: '+43 678 590 9989',
           website: 'https://dasatech.example',
@@ -395,47 +415,51 @@ export class AdminService {
     const applications = await Promise.all([
       this.prisma.application.upsert({
         where: { name: 'Maschinenbau' },
-        update: {},
-        create: { name: 'Maschinenbau' },
+        update: { nameDe: 'Maschinenbau' },
+        create: { name: 'Maschinenbau', nameDe: 'Maschinenbau' },
       }),
       this.prisma.application.upsert({
         where: { name: 'Solaranlagen' },
-        update: {},
-        create: { name: 'Solaranlagen' },
+        update: { nameDe: 'Solaranlagen' },
+        create: { name: 'Solaranlagen', nameDe: 'Solaranlagen' },
       }),
       this.prisma.application.upsert({
         where: { name: 'Transportkiste' },
-        update: {},
-        create: { name: 'Transportkiste' },
+        update: { nameDe: 'Transportkiste' },
+        create: { name: 'Transportkiste', nameDe: 'Transportkiste' },
       }),
     ]);
 
     const crossSections = await Promise.all([
       this.prisma.crossSection.upsert({
         where: { name: '40x40 Leicht' },
-        update: {},
-        create: { name: '40x40 Leicht' },
+        update: { nameDe: '40x40 Leicht' },
+        create: { name: '40x40 Leicht', nameDe: '40x40 Leicht' },
       }),
       this.prisma.crossSection.upsert({
         where: { name: 'U-Profil 40x20x40' },
-        update: {},
-        create: { name: 'U-Profil 40x20x40' },
+        update: { nameDe: 'U-Profil 40x20x40' },
+        create: { name: 'U-Profil 40x20x40', nameDe: 'U-Profil 40x20x40' },
       }),
       this.prisma.crossSection.upsert({
         where: { name: 'Trennwandsystem 9.5x26x5.8' },
-        update: {},
-        create: { name: 'Trennwandsystem 9.5x26x5.8' },
+        update: { nameDe: 'Trennwandsystem 9.5x26x5.8' },
+        create: { name: 'Trennwandsystem 9.5x26x5.8', nameDe: 'Trennwandsystem 9.5x26x5.8' },
       }),
     ]);
 
     const profileSeed = [
       {
         name: 'B40 Sonderprofil',
+        nameDe: 'B40 Sonderprofil',
         description: '40x40mm modular profile for machine frames.',
+        descriptionDe: '40x40mm modulares Profil fur Maschinenrahmen.',
         usage: 'Maschinenbauteil',
+        usageDe: 'Maschinenbauteil',
         dimensions: '40x40mm',
         weightPerMeter: 1.74,
         material: 'Al Mg Si 0.5',
+        materialDe: 'Al Mg Si 0,5',
         lengthMm: 6000,
         drawingUrl: 'https://dummyimage.com/640x360/e9f2f2/19474f.png&text=B40+Drawing',
         photoUrl: 'https://dummyimage.com/640x360/dbe7ea/19474f.png&text=B40+Usage+Photo',
@@ -447,11 +471,15 @@ export class AdminService {
       },
       {
         name: 'X-Profil Transport',
+        nameDe: 'X-Profil Transport',
         description: 'Rigid profile for flightcase and transport constructions.',
+        descriptionDe: 'Starres Profil fur Flightcase- und Transportkonstruktionen.',
         usage: 'X-Profil Transportkiste',
+        usageDe: 'X-Profil Transportkiste',
         dimensions: '40x40mm',
         weightPerMeter: 0.67,
         material: 'Aluminium',
+        materialDe: 'Aluminium',
         lengthMm: 5800,
         drawingUrl: 'https://dummyimage.com/640x360/e6edf0/1e3a47.png&text=X-Profil+Drawing',
         photoUrl: 'https://dummyimage.com/640x360/d9e5eb/1e3a47.png&text=Flightcase+Usage',
@@ -463,11 +491,15 @@ export class AdminService {
       },
       {
         name: 'Trenner 9.5x26x5.8',
+        nameDe: 'Trenner 9.5x26x5.8',
         description: 'Partition profile for lightweight interior systems.',
+        descriptionDe: 'Trennprofil fur leichte Innenraumsysteme.',
         usage: 'Trennwandsystem',
+        usageDe: 'Trennwandsystem',
         dimensions: '9.5x26x5.8',
         weightPerMeter: 0.31,
         material: 'Aluminium',
+        materialDe: 'Aluminium',
         lengthMm: 4000,
         drawingUrl: 'https://dummyimage.com/640x360/e9eeea/2a5a3f.png&text=Trennwand+Drawing',
         photoUrl: 'https://dummyimage.com/640x360/dfe9e2/2a5a3f.png&text=Partition+Usage',
@@ -483,11 +515,15 @@ export class AdminService {
       await this.prisma.profile.upsert({
         where: { name: item.name },
         update: {
+          nameDe: item.nameDe,
           description: item.description,
+          descriptionDe: item.descriptionDe,
           usage: item.usage,
+          usageDe: item.usageDe,
           dimensions: item.dimensions,
           weightPerMeter: item.weightPerMeter,
           material: item.material,
+          materialDe: item.materialDe,
           lengthMm: item.lengthMm,
           drawingUrl: item.drawingUrl,
           photoUrl: item.photoUrl,
@@ -503,11 +539,15 @@ export class AdminService {
         },
         create: {
           name: item.name,
+          nameDe: item.nameDe,
           description: item.description,
+          descriptionDe: item.descriptionDe,
           usage: item.usage,
+          usageDe: item.usageDe,
           dimensions: item.dimensions,
           weightPerMeter: item.weightPerMeter,
           material: item.material,
+          materialDe: item.materialDe,
           lengthMm: item.lengthMm,
           drawingUrl: item.drawingUrl,
           photoUrl: item.photoUrl,

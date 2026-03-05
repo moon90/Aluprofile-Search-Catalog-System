@@ -16,10 +16,11 @@ import { Card, CardContent, CardHeader, CardTitle } from './components/ui/card';
 import { Input } from './components/ui/input';
 import ClerkUsersPanel from './ClerkUsersPanel';
 
-type RefOption = { id: number; name: string; profilesCount?: number };
+type RefOption = { id: number; name: string; nameDe?: string; profilesCount?: number };
 type Supplier = {
   id: number;
   name: string;
+  nameDe?: string;
   address?: string;
   contactPerson?: string;
   email?: string;
@@ -29,14 +30,18 @@ type Supplier = {
 type Profile = {
   id: number;
   name: string;
+  nameDe?: string;
   description?: string;
+  descriptionDe?: string;
   usage?: string;
+  usageDe?: string;
   drawingUrl?: string;
   photoUrl?: string;
   logoUrl?: string;
   dimensions?: string;
   weightPerMeter?: number;
   material?: string;
+  materialDe?: string;
   lengthMm?: number;
   status: string;
   supplier: Supplier;
@@ -65,10 +70,105 @@ type UserAccess = {
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:3000/api';
 
+type Lang = 'en' | 'de';
+const TXT = {
+  en: {
+    adminPanel: 'Admin Panel',
+    adminSubtitle: 'Manage users, permissions, and catalog master data',
+    backToCatalog: 'Back to Catalog',
+    language: 'Language',
+    profiles: 'Profiles',
+    suppliers: 'Suppliers',
+    categories: 'Categories',
+    clerkUsers: 'Clerk Users',
+    managedUsers: 'Managed Users',
+    signedInAs: 'Signed in as',
+    unknownUser: 'unknown user',
+    save: 'Save',
+    edit: 'Edit',
+    delete: 'Delete',
+    name: 'Name',
+    address: 'Address',
+    contactPerson: 'Contact person',
+    phone: 'Phone',
+    email: 'Email',
+    website: 'Website',
+    saveSupplier: 'Save Supplier',
+    application: 'Application',
+    appName: 'Application name',
+    saveApplication: 'Save Application',
+    crossSection: 'Cross-section',
+    crossSectionName: 'Cross-section name',
+    saveCrossSection: 'Save Cross-section',
+    saveProfile: 'Save Profile',
+    drawingFile: 'Drawing file',
+    photoFile: 'Photo file',
+    supplier: 'Supplier',
+    clerkUserId: 'Clerk User ID (user_xxx)',
+    saveUserAccess: 'Save User Access',
+    backendEnforced: 'Admin role plus permissions are enforced by backend for all /admin endpoints.',
+    login: 'Login',
+    accessDenied: 'Access denied',
+    accessDeniedText: 'you do not have VIEW_ADMIN permission for this page.',
+    quickActions: 'Quick Actions',
+    seedDemoData: 'Seed Demo Data',
+    supplierControls: 'Supplier Controls',
+    categoryControls: 'Category Controls',
+    profileControls: 'Profile Controls',
+    appRolePermissions: 'App Role & Permission Management',
+  },
+  de: {
+    adminPanel: 'Admin-Panel',
+    adminSubtitle: 'Benutzer, Berechtigungen und Katalog-Stammdaten verwalten',
+    backToCatalog: 'Zuruck zum Katalog',
+    language: 'Sprache',
+    profiles: 'Profile',
+    suppliers: 'Lieferanten',
+    categories: 'Kategorien',
+    clerkUsers: 'Clerk-Benutzer',
+    managedUsers: 'Verwaltete Benutzer',
+    signedInAs: 'Angemeldet als',
+    unknownUser: 'unbekannter Benutzer',
+    save: 'Speichern',
+    edit: 'Bearbeiten',
+    delete: 'Loschen',
+    name: 'Name',
+    address: 'Adresse',
+    contactPerson: 'Ansprechpartner',
+    phone: 'Telefon',
+    email: 'E-Mail',
+    website: 'Webseite',
+    saveSupplier: 'Lieferant speichern',
+    application: 'Anwendung',
+    appName: 'Anwendungsname',
+    saveApplication: 'Anwendung speichern',
+    crossSection: 'Querschnitt',
+    crossSectionName: 'Querschnittsname',
+    saveCrossSection: 'Querschnitt speichern',
+    saveProfile: 'Profil speichern',
+    drawingFile: 'Zeichnungsdatei',
+    photoFile: 'Fotodatei',
+    supplier: 'Lieferant',
+    clerkUserId: 'Clerk-Benutzer-ID (user_xxx)',
+    saveUserAccess: 'Benutzerzugriff speichern',
+    backendEnforced: 'Admin-Rolle und Berechtigungen werden fur alle /admin-Endpunkte im Backend erzwungen.',
+    login: 'Anmelden',
+    accessDenied: 'Zugriff verweigert',
+    accessDeniedText: 'Sie haben keine VIEW_ADMIN-Berechtigung fur diese Seite.',
+    quickActions: 'Schnellaktionen',
+    seedDemoData: 'Demo-Daten laden',
+    supplierControls: 'Lieferantenverwaltung',
+    categoryControls: 'Kategorienverwaltung',
+    profileControls: 'Profilverwaltung',
+    appRolePermissions: 'App-Rollen- und Berechtigungsverwaltung',
+  },
+} as const;
+
 function AdminPage() {
   const { getToken, isSignedIn } = useAuth();
   const { user } = useUser();
   const [message, setMessage] = useState('');
+  const [lang, setLang] = useState<Lang>('en');
   const [adminRef, setAdminRef] = useState<{
     suppliers: Supplier[];
     applications: RefOption[];
@@ -82,19 +182,25 @@ function AdminPage() {
   const [userAccessList, setUserAccessList] = useState<UserAccess[]>([]);
   const [supplierForm, setSupplierForm] = useState<Partial<Supplier>>({ name: '' });
   const [applicationName, setApplicationName] = useState('');
+  const [applicationNameDe, setApplicationNameDe] = useState('');
   const [crossSectionName, setCrossSectionName] = useState('');
+  const [crossSectionNameDe, setCrossSectionNameDe] = useState('');
   const [editType, setEditType] = useState<'supplier' | 'application' | 'cross' | 'profile' | ''>('');
   const [editId, setEditId] = useState<number | null>(null);
   const [profileForm, setProfileForm] = useState({
     name: '',
+    nameDe: '',
     description: '',
+    descriptionDe: '',
     usage: '',
+    usageDe: '',
     drawingUrl: '',
     photoUrl: '',
     logoUrl: '',
     dimensions: '',
     weightPerMeter: '',
     material: '',
+    materialDe: '',
     lengthMm: '',
     status: 'AVAILABLE',
     supplierId: '',
@@ -111,9 +217,23 @@ function AdminPage() {
     permissions: ['VIEW_ADMIN'],
   });
 
-  const isAdmin = authContext?.appRole === 'ADMIN';
-  const canManageUsers =
-    isAdmin && authContext.appPermissions.includes('USERS_MANAGE');
+  const t = TXT[lang];
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem('aluprofile_lang');
+    if (saved === 'en' || saved === 'de') setLang(saved);
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem('aluprofile_lang', lang);
+  }, [lang]);
+
+  const permissions = authContext?.appPermissions ?? [];
+  const canViewAdmin = permissions.includes('VIEW_ADMIN');
+  const canManageUsers = permissions.includes('USERS_MANAGE');
+  const canManageProfiles = permissions.includes('PROFILES_MANAGE');
+  const canManageSuppliers = permissions.includes('SUPPLIERS_MANAGE');
+  const canManageCategories = permissions.includes('CATEGORIES_MANAGE');
 
   const clerkAppearance = useMemo(
     () => ({
@@ -130,7 +250,8 @@ function AdminPage() {
         headerSubtitle: 'text-slate-600',
         formButtonPrimary: 'bg-teal-700 hover:bg-teal-800 text-white',
         formFieldInput: 'border-slate-200 bg-slate-50',
-        socialButtonsBlockButton: 'border-slate-200 bg-white hover:bg-slate-50',
+        socialButtonsBlockButton: 'hidden',
+        dividerRow: 'hidden',
         footer: 'hidden',
       },
     }),
@@ -154,13 +275,17 @@ function AdminPage() {
   }
 
   async function adminLoad() {
-    if (!isAdmin) return;
-    const [ref, adminProfileData] = await Promise.all([
-      api('/admin/reference-data', undefined, true),
-      api('/admin/profiles', undefined, true),
-    ]);
+    if (!canViewAdmin) return;
+
+    const ref = await api('/admin/reference-data', undefined, true);
     setAdminRef(ref);
-    setAdminProfiles(adminProfileData);
+
+    if (canManageProfiles) {
+      const adminProfileData = await api('/admin/profiles', undefined, true);
+      setAdminProfiles(adminProfileData);
+    } else {
+      setAdminProfiles([]);
+    }
   }
 
   async function loadAuthContext() {
@@ -187,8 +312,8 @@ function AdminPage() {
   }, [isSignedIn]);
 
   useEffect(() => {
-    adminLoad().catch((err) => isAdmin && setMessage(String(err)));
-  }, [isAdmin]);
+    adminLoad().catch((err) => canViewAdmin && setMessage(String(err)));
+  }, [canViewAdmin, canManageProfiles]);
 
   useEffect(() => {
     loadUserAccess().catch((err) => canManageUsers && setMessage(String(err)));
@@ -224,8 +349,9 @@ function AdminPage() {
     const method = editType === 'application' && editId ? 'PUT' : 'POST';
     const path =
       method === 'PUT' ? `/admin/applications/${editId}` : '/admin/applications';
-    await api(path, { method, body: JSON.stringify({ name: applicationName }) }, true);
+    await api(path, { method, body: JSON.stringify({ name: applicationName, nameDe: applicationNameDe || undefined }) }, true);
     setApplicationName('');
+    setApplicationNameDe('');
     setEditType('');
     setEditId(null);
     await adminLoad();
@@ -238,8 +364,9 @@ function AdminPage() {
       method === 'PUT'
         ? `/admin/cross-sections/${editId}`
         : '/admin/cross-sections';
-    await api(path, { method, body: JSON.stringify({ name: crossSectionName }) }, true);
+    await api(path, { method, body: JSON.stringify({ name: crossSectionName, nameDe: crossSectionNameDe || undefined }) }, true);
     setCrossSectionName('');
+    setCrossSectionNameDe('');
     setEditType('');
     setEditId(null);
     await adminLoad();
@@ -261,14 +388,18 @@ function AdminPage() {
     );
     setProfileForm({
       name: '',
+      nameDe: '',
       description: '',
+      descriptionDe: '',
       usage: '',
+      usageDe: '',
       drawingUrl: '',
       photoUrl: '',
       logoUrl: '',
       dimensions: '',
       weightPerMeter: '',
       material: '',
+      materialDe: '',
       lengthMm: '',
       status: 'AVAILABLE',
       supplierId: '',
@@ -321,17 +452,26 @@ function AdminPage() {
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_12%_8%,#dff0f0,transparent_34%),radial-gradient(circle_at_86%_0%,#d6ecec,transparent_36%),linear-gradient(180deg,#eef6f6_0%,#f9fbfb_100%)]">
       <div className="mx-auto max-w-[1280px] px-4 py-8 md:px-8">
+        {isSignedIn && (
         <header className="mb-6 rounded-2xl border border-teal-100/70 bg-white/95 p-5 shadow-[0_15px_40px_-24px_rgba(17,94,89,0.45)] md:p-7">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <p className="mb-2 text-xs font-semibold uppercase tracking-[0.35em] text-teal-700">catalog system</p>
-              <h1 className="text-3xl font-black tracking-tight text-slate-900 md:text-5xl">Admin Panel</h1>
-              <p className="mt-2 max-w-3xl text-slate-600">Manage users, permissions, and catalog master data</p>
+              <h1 className="text-3xl font-black tracking-tight text-slate-900 md:text-5xl">{t.adminPanel}</h1>
+              <p className="mt-2 max-w-3xl text-slate-600">{t.adminSubtitle}</p>
             </div>
             <div className="flex items-center gap-2">
               <a href="/">
-                <Button variant="secondary">Back to Catalog</Button>
+                <Button variant="secondary">{t.backToCatalog}</Button>
               </a>
+              {/* language */}
+              <label className="text-sm font-medium text-slate-700">
+                {t.language}:{' '}
+                <select className="rounded-md border bg-background px-3 py-2" value={lang} onChange={(e) => setLang(e.target.value as Lang)}>
+                  <option value="en">EN</option>
+                  <option value="de">DE</option>
+                </select>
+              </label>
               <SignedIn>
                 <div className="rounded-md border bg-card p-1">
                   <UserButton />
@@ -342,23 +482,24 @@ function AdminPage() {
 
           <div className="mt-5 grid gap-3 md:grid-cols-4">
             <div className="rounded-xl border border-teal-100 bg-teal-50/60 p-3">
-              <p className="text-xs uppercase tracking-wider text-teal-700">Profiles</p>
+              <p className="text-xs uppercase tracking-wider text-teal-700">{t.profiles}</p>
               <p className="mt-1 flex items-center gap-2 text-2xl font-bold text-slate-900"><Boxes className="h-5 w-5 text-teal-700" /> {adminProfiles.length}</p>
             </div>
             <div className="rounded-xl border border-teal-100 bg-teal-50/60 p-3">
-              <p className="text-xs uppercase tracking-wider text-teal-700">Suppliers</p>
+              <p className="text-xs uppercase tracking-wider text-teal-700">{t.suppliers}</p>
               <p className="mt-1 flex items-center gap-2 text-2xl font-bold text-slate-900"><Building2 className="h-5 w-5 text-teal-700" /> {adminRef?.suppliers.length ?? 0}</p>
             </div>
             <div className="rounded-xl border border-teal-100 bg-teal-50/60 p-3">
-              <p className="text-xs uppercase tracking-wider text-teal-700">Categories</p>
+              <p className="text-xs uppercase tracking-wider text-teal-700">{t.categories}</p>
               <p className="mt-1 flex items-center gap-2 text-2xl font-bold text-slate-900"><Layers className="h-5 w-5 text-teal-700" /> {(adminRef?.applications.length ?? 0) + (adminRef?.crossSections.length ?? 0)}</p>
             </div>
             <div className="rounded-xl border border-teal-100 bg-teal-50/60 p-3">
-              <p className="text-xs uppercase tracking-wider text-teal-700">Managed Users</p>
+              <p className="text-xs uppercase tracking-wider text-teal-700">{t.managedUsers}</p>
               <p className="mt-1 flex items-center gap-2 text-2xl font-bold text-slate-900"><Users className="h-5 w-5 text-teal-700" /> {userAccessList.length}</p>
             </div>
           </div>
         </header>
+        )}
 
         {message && <p className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{message}</p>}
 
@@ -366,124 +507,138 @@ function AdminPage() {
           <SignedOut>
             <Card className="rounded-2xl border-slate-200 bg-white/95 lg:col-span-3">
               <CardHeader>
-                <CardTitle>Login</CardTitle>
+                <CardTitle>{t.login}</CardTitle>
               </CardHeader>
               <CardContent className="flex min-h-[60vh] items-center justify-center rounded-b-xl bg-gradient-to-b from-white to-teal-50/40">
-                <SignIn routing="hash" appearance={clerkAppearance} />
+                <SignIn routing="hash" appearance={clerkAppearance} forceRedirectUrl="/admin" fallbackRedirectUrl="/admin" />
               </CardContent>
             </Card>
           </SignedOut>
 
           <SignedIn>
-            {!isAdmin && (
+            {!canViewAdmin && (
               <Card className="rounded-2xl border-slate-200 bg-white/95 lg:col-span-3">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-red-700"><Shield className="h-5 w-5" /> Access denied</CardTitle>
+                  <CardTitle className="flex items-center gap-2 text-red-700"><Shield className="h-5 w-5" /> {t.accessDenied}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
-                    Signed in as {user?.primaryEmailAddress?.emailAddress ?? 'unknown user'}, but this page is for role ADMIN only.
+                    {t.signedInAs} {user?.primaryEmailAddress?.emailAddress ?? t.unknownUser}, but {t.accessDeniedText}
                   </p>
                 </CardContent>
               </Card>
             )}
 
-            {isAdmin && (
+            {canViewAdmin && (
               <>
-                <Card className="rounded-2xl border-slate-200 bg-white/95 lg:col-span-3">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><Wrench className="h-5 w-5 text-teal-700" /> Quick Actions</CardTitle>
-                  </CardHeader>
-                  <CardContent className="flex flex-wrap gap-2">
-                    <Button onClick={seedDemoData}>Seed Demo Data</Button>
-                  </CardContent>
-                </Card>
+                {canManageProfiles && (
+                  <Card className="rounded-2xl border-slate-200 bg-white/95 lg:col-span-3">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2"><Wrench className="h-5 w-5 text-teal-700" /> {t.quickActions}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex flex-wrap gap-2">
+                      <Button onClick={seedDemoData}>{t.seedDemoData}</Button>
+                    </CardContent>
+                  </Card>
+                )}
 
-                <ClerkUsersPanel canManageUsers={canManageUsers} />
+                <ClerkUsersPanel canManageUsers={canManageUsers} lang={lang} />
 
+                {canManageSuppliers && (
                 <Card className="rounded-2xl border-slate-200 bg-white/95">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><Building2 className="h-5 w-5 text-teal-700" /> Supplier Controls</CardTitle>
+                    <CardTitle className="flex items-center gap-2"><Building2 className="h-5 w-5 text-teal-700" /> {t.supplierControls}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="mb-3 grid gap-2 md:grid-cols-2">
-                      <Input placeholder="Name" value={supplierForm.name ?? ''} onChange={(e) => setSupplierForm((f) => ({ ...f, name: e.target.value }))} />
-                      <Input placeholder="Address" value={supplierForm.address ?? ''} onChange={(e) => setSupplierForm((f) => ({ ...f, address: e.target.value }))} />
-                      <Input placeholder="Contact person" value={supplierForm.contactPerson ?? ''} onChange={(e) => setSupplierForm((f) => ({ ...f, contactPerson: e.target.value }))} />
-                      <Input placeholder="Phone" value={supplierForm.phone ?? ''} onChange={(e) => setSupplierForm((f) => ({ ...f, phone: e.target.value }))} />
-                      <Input placeholder="Email" value={supplierForm.email ?? ''} onChange={(e) => setSupplierForm((f) => ({ ...f, email: e.target.value }))} />
-                      <Input placeholder="Website" value={supplierForm.website ?? ''} onChange={(e) => setSupplierForm((f) => ({ ...f, website: e.target.value }))} />
+                      <Input placeholder={t.name + ' (EN)'} value={supplierForm.name ?? ''} onChange={(e) => setSupplierForm((f) => ({ ...f, name: e.target.value }))} />
+                      <Input placeholder={t.name + ' (DE)'} value={supplierForm.nameDe ?? ''} onChange={(e) => setSupplierForm((f) => ({ ...f, nameDe: e.target.value }))} />
+                      <Input placeholder={t.address} value={supplierForm.address ?? ''} onChange={(e) => setSupplierForm((f) => ({ ...f, address: e.target.value }))} />
+                      <Input placeholder={t.contactPerson} value={supplierForm.contactPerson ?? ''} onChange={(e) => setSupplierForm((f) => ({ ...f, contactPerson: e.target.value }))} />
+                      <Input placeholder={t.phone} value={supplierForm.phone ?? ''} onChange={(e) => setSupplierForm((f) => ({ ...f, phone: e.target.value }))} />
+                      <Input placeholder={t.email} value={supplierForm.email ?? ''} onChange={(e) => setSupplierForm((f) => ({ ...f, email: e.target.value }))} />
+                      <Input placeholder={t.website} value={supplierForm.website ?? ''} onChange={(e) => setSupplierForm((f) => ({ ...f, website: e.target.value }))} />
                     </div>
-                    <Button onClick={saveSupplier}>Save Supplier</Button>
+                    <Button onClick={saveSupplier}>{t.saveSupplier}</Button>
                     <ul className="mt-2 space-y-1 text-sm">
                       {adminRef?.suppliers.map((s) => (
                         <li key={s.id} className="flex items-center justify-between gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
-                          <span className="font-medium text-slate-800">{s.name}</span>
+                          <span className="font-medium text-slate-800">{s.name}{s.nameDe ? ` / ${s.nameDe}` : ''}</span>
                           <div className="flex gap-1">
-                            <Button size="sm" variant="ghost" onClick={() => { setEditType('supplier'); setEditId(s.id); setSupplierForm(s); }}>Edit</Button>
-                            <Button size="sm" variant="destructive" onClick={() => deleteItem(`/admin/suppliers/${s.id}`)}>Delete</Button>
+                            <Button size="sm" variant="ghost" onClick={() => { setEditType('supplier'); setEditId(s.id); setSupplierForm(s); }}>{t.edit}</Button>
+                            <Button size="sm" variant="destructive" onClick={() => deleteItem(`/admin/suppliers/${s.id}`)}>{t.delete}</Button>
                           </div>
                         </li>
                       ))}
                     </ul>
                   </CardContent>
                 </Card>
+                )}
 
+                {canManageCategories && (
                 <Card className="rounded-2xl border-slate-200 bg-white/95">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><Layers className="h-5 w-5 text-teal-700" /> Category Controls</CardTitle>
+                    <CardTitle className="flex items-center gap-2"><Layers className="h-5 w-5 text-teal-700" /> {t.categoryControls}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <h3 className="mb-1 font-semibold">Application</h3>
-                    <Input value={applicationName} onChange={(e) => setApplicationName(e.target.value)} placeholder="Application name" />
-                    <Button className="mt-2" onClick={saveApplication}>Save Application</Button>
+                    <h3 className="mb-1 font-semibold">{t.application}</h3>
+                    <Input value={applicationName} onChange={(e) => setApplicationName(e.target.value)} placeholder={t.appName + ' (EN)'} />
+                    <Input value={applicationNameDe} onChange={(e) => setApplicationNameDe(e.target.value)} placeholder={t.appName + ' (DE)'} />
+                    <Button className="mt-2" onClick={saveApplication}>{t.saveApplication}</Button>
                     <ul className="mt-2 space-y-1 text-sm">
                       {adminRef?.applications.map((a) => (
                         <li key={a.id} className="flex items-center justify-between gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
-                          <span className="font-medium text-slate-800">{a.name}</span>
+                          <span className="font-medium text-slate-800">{a.name}{a.nameDe ? ` / ${a.nameDe}` : ''}</span>
                           <div className="flex gap-1">
-                            <Button size="sm" variant="ghost" onClick={() => { setEditType('application'); setEditId(a.id); setApplicationName(a.name); }}>Edit</Button>
-                            <Button size="sm" variant="destructive" onClick={() => deleteItem(`/admin/applications/${a.id}`)}>Delete</Button>
+                            <Button size="sm" variant="ghost" onClick={() => { setEditType('application'); setEditId(a.id); setApplicationName(a.name); setApplicationNameDe(a.nameDe ?? ''); }}>{t.edit}</Button>
+                            <Button size="sm" variant="destructive" onClick={() => deleteItem(`/admin/applications/${a.id}`)}>{t.delete}</Button>
                           </div>
                         </li>
                       ))}
                     </ul>
 
-                    <h3 className="mb-1 mt-4 font-semibold">Cross-section</h3>
-                    <Input value={crossSectionName} onChange={(e) => setCrossSectionName(e.target.value)} placeholder="Cross-section name" />
-                    <Button className="mt-2" onClick={saveCrossSection}>Save Cross-section</Button>
+                    <h3 className="mb-1 mt-4 font-semibold">{t.crossSection}</h3>
+                    <Input value={crossSectionName} onChange={(e) => setCrossSectionName(e.target.value)} placeholder={t.crossSectionName + ' (EN)'} />
+                    <Input value={crossSectionNameDe} onChange={(e) => setCrossSectionNameDe(e.target.value)} placeholder={t.crossSectionName + ' (DE)'} />
+                    <Button className="mt-2" onClick={saveCrossSection}>{t.saveCrossSection}</Button>
                     <ul className="mt-2 space-y-1 text-sm">
                       {adminRef?.crossSections.map((c) => (
                         <li key={c.id} className="flex items-center justify-between gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
-                          <span className="font-medium text-slate-800">{c.name}</span>
+                          <span className="font-medium text-slate-800">{c.name}{c.nameDe ? ` / ${c.nameDe}` : ''}</span>
                           <div className="flex gap-1">
-                            <Button size="sm" variant="ghost" onClick={() => { setEditType('cross'); setEditId(c.id); setCrossSectionName(c.name); }}>Edit</Button>
-                            <Button size="sm" variant="destructive" onClick={() => deleteItem(`/admin/cross-sections/${c.id}`)}>Delete</Button>
+                            <Button size="sm" variant="ghost" onClick={() => { setEditType('cross'); setEditId(c.id); setCrossSectionName(c.name); setCrossSectionNameDe(c.nameDe ?? ''); }}>{t.edit}</Button>
+                            <Button size="sm" variant="destructive" onClick={() => deleteItem(`/admin/cross-sections/${c.id}`)}>{t.delete}</Button>
                           </div>
                         </li>
                       ))}
                     </ul>
                   </CardContent>
                 </Card>
+                )}
 
+                {canManageProfiles && (
                 <Card className="rounded-2xl border-slate-200 bg-white/95 lg:col-span-3">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><Boxes className="h-5 w-5 text-teal-700" /> Profile Controls</CardTitle>
+                    <CardTitle className="flex items-center gap-2"><Boxes className="h-5 w-5 text-teal-700" /> {t.profileControls}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="mb-3 grid gap-2 md:grid-cols-3">
-                      <Input placeholder="Name" value={profileForm.name} onChange={(e) => setProfileForm((f) => ({ ...f, name: e.target.value }))} />
-                      <Input placeholder="Description" value={profileForm.description} onChange={(e) => setProfileForm((f) => ({ ...f, description: e.target.value }))} />
-                      <Input placeholder="Usage" value={profileForm.usage} onChange={(e) => setProfileForm((f) => ({ ...f, usage: e.target.value }))} />
+                      <Input placeholder={t.name + ' (EN)'} value={profileForm.name} onChange={(e) => setProfileForm((f) => ({ ...f, name: e.target.value }))} />
+                      <Input placeholder={t.name + ' (DE)'} value={profileForm.nameDe} onChange={(e) => setProfileForm((f) => ({ ...f, nameDe: e.target.value }))} />
+                      <Input placeholder="Description (EN)" value={profileForm.description} onChange={(e) => setProfileForm((f) => ({ ...f, description: e.target.value }))} />
+                      <Input placeholder="Description (DE)" value={profileForm.descriptionDe} onChange={(e) => setProfileForm((f) => ({ ...f, descriptionDe: e.target.value }))} />
+                      <Input placeholder="Usage (EN)" value={profileForm.usage} onChange={(e) => setProfileForm((f) => ({ ...f, usage: e.target.value }))} />
+                      <Input placeholder="Usage (DE)" value={profileForm.usageDe} onChange={(e) => setProfileForm((f) => ({ ...f, usageDe: e.target.value }))} />
                       <Input placeholder="Dimensions" value={profileForm.dimensions} onChange={(e) => setProfileForm((f) => ({ ...f, dimensions: e.target.value }))} />
                       <Input placeholder="Weight/m" value={profileForm.weightPerMeter} onChange={(e) => setProfileForm((f) => ({ ...f, weightPerMeter: e.target.value }))} />
                       <Input placeholder="Length mm" value={profileForm.lengthMm} onChange={(e) => setProfileForm((f) => ({ ...f, lengthMm: e.target.value }))} />
-                      <Input placeholder="Material" value={profileForm.material} onChange={(e) => setProfileForm((f) => ({ ...f, material: e.target.value }))} />
+                      <Input placeholder="Material (EN)" value={profileForm.material} onChange={(e) => setProfileForm((f) => ({ ...f, material: e.target.value }))} />
+                      <Input placeholder="Material (DE)" value={profileForm.materialDe} onChange={(e) => setProfileForm((f) => ({ ...f, materialDe: e.target.value }))} />
                       <select className="rounded-md border bg-background px-3 py-2" value={profileForm.status} onChange={(e) => setProfileForm((f) => ({ ...f, status: e.target.value }))}>
                         {adminRef?.statusOptions.map((s) => <option key={s} value={s}>{s}</option>)}
                       </select>
                       <select className="rounded-md border bg-background px-3 py-2" value={profileForm.supplierId} onChange={(e) => setProfileForm((f) => ({ ...f, supplierId: e.target.value }))}>
-                        <option value="">Supplier</option>
+                        <option value="">{t.supplier}</option>
                         {adminRef?.suppliers.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
                       </select>
                       <select className="rounded-md border bg-background px-3 py-2" multiple value={profileForm.applicationIds.map(String)} onChange={(e) => setProfileForm((f) => ({ ...f, applicationIds: Array.from(e.target.selectedOptions).map((o) => Number(o.value)) }))}>
@@ -492,7 +647,7 @@ function AdminPage() {
                       <select className="rounded-md border bg-background px-3 py-2" multiple value={profileForm.crossSectionIds.map(String)} onChange={(e) => setProfileForm((f) => ({ ...f, crossSectionIds: Array.from(e.target.selectedOptions).map((o) => Number(o.value)) }))}>
                         {adminRef?.crossSections.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                       </select>
-                      <label className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm">Drawing file
+                      <label className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm">{t.drawingFile}
                         <input className="mt-1 block w-full" type="file" accept="image/*,.pdf" onChange={async (e) => {
                           const file = e.target.files?.[0];
                           if (!file) return;
@@ -500,7 +655,7 @@ function AdminPage() {
                           setProfileForm((f) => ({ ...f, drawingUrl: data.url }));
                         }} />
                       </label>
-                      <label className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm">Photo file
+                      <label className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm">{t.photoFile}
                         <input className="mt-1 block w-full" type="file" accept="image/*,.pdf" onChange={async (e) => {
                           const file = e.target.files?.[0];
                           if (!file) return;
@@ -509,49 +664,54 @@ function AdminPage() {
                         }} />
                       </label>
                     </div>
-                    <Button onClick={saveProfile}>Save Profile</Button>
+                    <Button onClick={saveProfile}>{t.saveProfile}</Button>
                     <ul className="mt-3 space-y-1 text-sm">
                       {adminProfiles.map((p) => (
                         <li key={p.id} className="flex items-center justify-between gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
-                          <span className="font-medium text-slate-800">{p.name} ({p.status})</span>
+                          <span className="font-medium text-slate-800">{p.name}{p.nameDe ? ` / ${p.nameDe}` : ''} ({p.status})</span>
                           <div className="flex gap-1">
                             <Button size="sm" variant="ghost" onClick={() => {
                               setEditType('profile');
                               setEditId(p.id);
                               setProfileForm({
                                 name: p.name ?? '',
+                                nameDe: p.nameDe ?? '',
                                 description: p.description ?? '',
+                                descriptionDe: p.descriptionDe ?? '',
                                 usage: p.usage ?? '',
+                                usageDe: p.usageDe ?? '',
                                 drawingUrl: p.drawingUrl ?? '',
                                 photoUrl: p.photoUrl ?? '',
                                 logoUrl: p.logoUrl ?? '',
                                 dimensions: p.dimensions ?? '',
                                 weightPerMeter: String(p.weightPerMeter ?? ''),
                                 material: p.material ?? '',
+                                materialDe: p.materialDe ?? '',
                                 lengthMm: String(p.lengthMm ?? ''),
                                 status: p.status ?? 'AVAILABLE',
                                 supplierId: String(p.supplier?.id ?? ''),
                                 applicationIds: p.applications.map((a) => a.id),
                                 crossSectionIds: p.crossSections.map((c) => c.id),
                               });
-                            }}>Edit</Button>
-                            <Button size="sm" variant="destructive" onClick={() => deleteItem(`/admin/profiles/${p.id}`)}>Delete</Button>
+                            }}>{t.edit}</Button>
+                            <Button size="sm" variant="destructive" onClick={() => deleteItem(`/admin/profiles/${p.id}`)}>{t.delete}</Button>
                           </div>
                         </li>
                       ))}
                     </ul>
                   </CardContent>
                 </Card>
+                )}
 
                 {canManageUsers && (
                   <Card className="rounded-2xl border-slate-200 bg-white/95 lg:col-span-3">
                     <CardHeader>
-                      <CardTitle className="flex items-center gap-2"><UserCog className="h-5 w-5 text-teal-700" /> User Role & Permission Management</CardTitle>
+                      <CardTitle className="flex items-center gap-2"><UserCog className="h-5 w-5 text-teal-700" /> {t.appRolePermissions}</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="mb-3 grid gap-2 md:grid-cols-3">
                         <Input
-                          placeholder="Clerk User ID (user_xxx)"
+                          placeholder={t.clerkUserId}
                           value={userAccessForm.clerkUserId}
                           onChange={(e) =>
                             setUserAccessForm((f) => ({
@@ -576,7 +736,7 @@ function AdminPage() {
                             </option>
                           ))}
                         </select>
-                        <Button onClick={saveUserAccess}>Save User Access</Button>
+                        <Button onClick={saveUserAccess}>{t.saveUserAccess}</Button>
                       </div>
                       <div className="mb-3 grid gap-2 md:grid-cols-2">
                         {(adminRef?.permissionOptions ?? ['VIEW_ADMIN', 'PROFILES_MANAGE', 'SUPPLIERS_MANAGE', 'CATEGORIES_MANAGE', 'USERS_MANAGE'] as AppPermission[]).map((permission) => (
@@ -631,7 +791,7 @@ function AdminPage() {
                           </li>
                         ))}
                       </ul>
-                      <p className="mt-3 flex items-center gap-1 text-xs text-slate-500"><BadgeCheck className="h-3 w-3" /> Admin role plus permissions are enforced by backend for all /admin endpoints.</p>
+                      <p className="mt-3 flex items-center gap-1 text-xs text-slate-500"><BadgeCheck className="h-3 w-3" /> {t.backendEnforced}</p>
                     </CardContent>
                   </Card>
                 )}

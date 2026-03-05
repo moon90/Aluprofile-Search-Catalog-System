@@ -15,14 +15,18 @@ model Profile {
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
   name            String         @unique
+  nameDe          String?
   description     String?
+  descriptionDe   String?
   usage           String?
+  usageDe         String?
   drawingUrl      String?
   photoUrl        String?
   logoUrl         String?
   dimensions      String?
   weightPerMeter  Float?
   material        String?
+  materialDe      String?
   lengthMm        Int?
   status          Status         @default(AVAILABLE)
 
@@ -36,6 +40,7 @@ model Profile {
 model Supplier {
   id              Int       @id @default(autoincrement())
   name            String    @unique
+  nameDe          String?
   address         String?
   contactPerson   String?
   email           String?
@@ -47,12 +52,14 @@ model Supplier {
 model Application {
   id        Int       @id @default(autoincrement())
   name      String    @unique
+  nameDe    String?
   profiles  Profile[] @relation("ApplicationToProfile")
 }
 
 model CrossSection {
   id        Int       @id @default(autoincrement())
   name      String    @unique
+  nameDe    String?
   profiles  Profile[] @relation("CrossSectionToProfile")
 }
 

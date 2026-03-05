@@ -24,7 +24,6 @@ import { AdminService, ProfileInput } from './admin.service';
 import { AppPermission, AppRole, Status } from '../../node_modules/.prisma/client';
 import {
   RequirePermissions,
-  RequireRoles,
 } from '../auth/authz.decorators';
 
 function toNumberArray(input: unknown): number[] {
@@ -54,8 +53,11 @@ function parseProfileBody(
   }
   return {
     name: body.name ? String(body.name) : undefined,
+    nameDe: body.nameDe ? String(body.nameDe) : undefined,
     description: body.description ? String(body.description) : undefined,
+    descriptionDe: body.descriptionDe ? String(body.descriptionDe) : undefined,
     usage: body.usage ? String(body.usage) : undefined,
+    usageDe: body.usageDe ? String(body.usageDe) : undefined,
     drawingUrl: body.drawingUrl ? String(body.drawingUrl) : undefined,
     photoUrl: body.photoUrl ? String(body.photoUrl) : undefined,
     logoUrl: body.logoUrl ? String(body.logoUrl) : undefined,
@@ -64,6 +66,7 @@ function parseProfileBody(
       ? Number(body.weightPerMeter)
       : undefined,
     material: body.material ? String(body.material) : undefined,
+    materialDe: body.materialDe ? String(body.materialDe) : undefined,
     lengthMm: body.lengthMm ? Number(body.lengthMm) : undefined,
     status: body.status ? (String(body.status) as Status) : undefined,
     supplierId,
@@ -74,7 +77,6 @@ function parseProfileBody(
 
 @Controller('admin')
 @UseGuards(AdminGuard)
-@RequireRoles(AppRole.ADMIN)
 @RequirePermissions(AppPermission.VIEW_ADMIN)
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
@@ -180,6 +182,7 @@ export class AdminController {
     @Body()
     body: {
       name: string;
+      nameDe?: string;
       address?: string;
       contactPerson?: string;
       email?: string;
@@ -197,6 +200,7 @@ export class AdminController {
     @Body()
     body: {
       name?: string;
+      nameDe?: string;
       address?: string;
       contactPerson?: string;
       email?: string;
@@ -221,17 +225,23 @@ export class AdminController {
 
   @Post('applications')
   @RequirePermissions(AppPermission.CATEGORIES_MANAGE)
-  createApplication(@Body() body: { name: string }) {
-    return this.adminService.createApplication(body.name);
+  createApplication(@Body() body: { name: string; nameDe?: string }) {
+    return this.adminService.createApplication({
+      name: body.name,
+      nameDe: body.nameDe,
+    });
   }
 
   @Put('applications/:id')
   @RequirePermissions(AppPermission.CATEGORIES_MANAGE)
   updateApplication(
     @Param('id', ParseIntPipe) id: number,
-    @Body() body: { name: string },
+    @Body() body: { name: string; nameDe?: string },
   ) {
-    return this.adminService.updateApplication(id, body.name);
+    return this.adminService.updateApplication(id, {
+      name: body.name,
+      nameDe: body.nameDe,
+    });
   }
 
   @Delete('applications/:id')
@@ -248,17 +258,23 @@ export class AdminController {
 
   @Post('cross-sections')
   @RequirePermissions(AppPermission.CATEGORIES_MANAGE)
-  createCrossSection(@Body() body: { name: string }) {
-    return this.adminService.createCrossSection(body.name);
+  createCrossSection(@Body() body: { name: string; nameDe?: string }) {
+    return this.adminService.createCrossSection({
+      name: body.name,
+      nameDe: body.nameDe,
+    });
   }
 
   @Put('cross-sections/:id')
   @RequirePermissions(AppPermission.CATEGORIES_MANAGE)
   updateCrossSection(
     @Param('id', ParseIntPipe) id: number,
-    @Body() body: { name: string },
+    @Body() body: { name: string; nameDe?: string },
   ) {
-    return this.adminService.updateCrossSection(id, body.name);
+    return this.adminService.updateCrossSection(id, {
+      name: body.name,
+      nameDe: body.nameDe,
+    });
   }
 
   @Delete('cross-sections/:id')

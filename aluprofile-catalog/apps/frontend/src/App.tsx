@@ -54,12 +54,78 @@ const TXT = {
     subtitle: 'Find the right aluminum profile with technical details and supplier contact.',
     search: 'Search',
     language: 'Language',
+    adminPanel: 'Admin Panel',
+    totalProfiles: 'Total Profiles',
+    applications: 'Applications',
+    crossSections: 'Cross-sections',
+    nameKeyword: 'Name / keyword',
+    application: 'Application',
+    crossSection: 'Cross-section',
+    supplier: 'Supplier',
+    material: 'Material',
+    dimensions: 'Dimensions',
+    profileCatalog: 'Profile Catalog',
+    drawing: 'Drawing',
+    description: 'Description',
+    applicationCol: 'Application',
+    visual: 'Visual',
+    contact: 'Contact',
+    details: 'Details',
+    noProfiles: '{t.noProfiles}',
+    profileDetailSheet: 'Profile Detail Sheet',
+    selectProfile: 'Select a profile from the table.',
+    technicalView: 'Technical View',
+    designation: 'Designation',
+    masse: 'Size',
+    weightPerMeter: 'Weight kg/m',
+    length: 'Length',
+    usage: 'Usage',
+    status: 'Status',
+    supplierFiles: 'Supplier & Files',
+    contactPerson: 'Contact person',
+    openDrawing: 'Open Drawing',
+    openPhoto: 'Open Photo',
+    openLogo: 'Open Logo',
+    linkedCategories: 'Linked Categories',
   },
   de: {
     title: 'Aluprofile Suche & Katalog',
     subtitle: 'Finden Sie das passende Aluminiumprofil mit technischen Daten und Lieferantenkontakt.',
     search: 'Suche',
     language: 'Sprache',
+    adminPanel: 'Admin-Panel',
+    totalProfiles: 'Gesamtprofile',
+    applications: 'Anwendungen',
+    crossSections: 'Querschnitte',
+    nameKeyword: 'Name / Stichwort',
+    application: 'Anwendung',
+    crossSection: 'Querschnitt',
+    supplier: 'Lieferant',
+    material: 'Material',
+    dimensions: 'Abmessungen',
+    profileCatalog: 'Profilkatalog',
+    drawing: 'Zeichnung',
+    description: 'Beschreibung',
+    applicationCol: 'Anwendung',
+    visual: 'Ansicht',
+    contact: 'Kontakt',
+    details: 'Details',
+    noProfiles: 'Keine Profile fur die aktuellen Filter gefunden.',
+    profileDetailSheet: 'Profil-Detailblatt',
+    selectProfile: 'Bitte ein Profil aus der Tabelle auswahlen.',
+    technicalView: 'Technische Ansicht',
+    designation: 'Bezeichnung',
+    masse: 'Masse',
+    weightPerMeter: 'Gewicht kg/m',
+    length: 'Lange',
+    usage: 'Anwendung',
+    status: 'Status',
+    supplierFiles: 'Lieferant & Dateien',
+    contactPerson: 'Ansprechpartner',
+    openDrawing: 'Zeichnung offnen',
+    openPhoto: 'Foto offnen',
+    openLogo: 'Logo offnen',
+    linkedCategories: 'Verknupfte Kategorien',
   },
 } as const;
 
@@ -96,6 +162,15 @@ function App() {
 
   const t = useMemo(() => TXT[lang], [lang]);
 
+  useEffect(() => {
+    const saved = window.localStorage.getItem('aluprofile_lang');
+    if (saved === 'en' || saved === 'de') setLang(saved);
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem('aluprofile_lang', lang);
+  }, [lang]);
+
   const qs = (obj: Record<string, string>) => {
     const params = new URLSearchParams();
     Object.entries(obj).forEach(([k, v]) => {
@@ -120,8 +195,8 @@ function App() {
 
   async function loadPublic() {
     const [overviewData, profileData] = await Promise.all([
-      api('/public/overview'),
-      api(`/public/profiles?${qs(filters)}`),
+      api(`/public/overview?lang=${lang}`),
+      api(`/public/profiles?${qs({ ...filters, lang })}`),
     ]);
     const profileList = profileData as Profile[];
     setOverview(overviewData);
@@ -140,7 +215,7 @@ function App() {
   }
 
   async function loadDetail(id: number) {
-    setDetail(await api(`/public/profiles/${id}`));
+    setDetail(await api(`/public/profiles/${id}?lang=${lang}`));
   }
 
   useEffect(() => {
@@ -149,7 +224,7 @@ function App() {
 
   useEffect(() => {
     loadPublic().catch((err) => setMessage(String(err)));
-  }, [filters]);
+  }, [filters, lang]);
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_12%_8%,#dff0f0,transparent_34%),radial-gradient(circle_at_86%_0%,#d6ecec,transparent_36%),linear-gradient(180deg,#eef6f6_0%,#f9fbfb_100%)]">
@@ -162,9 +237,11 @@ function App() {
               <p className="mt-2 max-w-3xl text-slate-600">{t.subtitle}</p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <a href="/admin">
-                <Button variant="secondary">Admin Panel</Button>
+              <SignedIn>
+                <a href="/admin">
+                <Button variant="secondary">{t.adminPanel}</Button>
               </a>
+              </SignedIn>
               <label className="text-sm font-medium text-slate-700">
                 {t.language}:{' '}
                 <select
@@ -186,19 +263,19 @@ function App() {
 
           <div className="mt-5 grid gap-3 md:grid-cols-3">
             <div className="rounded-xl border border-teal-100 bg-teal-50/60 p-3">
-              <p className="text-xs uppercase tracking-wider text-teal-700">Total Profiles</p>
+              <p className="text-xs uppercase tracking-wider text-teal-700">{t.totalProfiles}</p>
               <p className="mt-1 flex items-center gap-2 text-2xl font-bold text-slate-900">
                 <Boxes className="h-5 w-5 text-teal-700" /> {overview?.totals?.profiles ?? 0}
               </p>
             </div>
             <div className="rounded-xl border border-teal-100 bg-teal-50/60 p-3">
-              <p className="text-xs uppercase tracking-wider text-teal-700">Applications</p>
+              <p className="text-xs uppercase tracking-wider text-teal-700">{t.applications}</p>
               <p className="mt-1 flex items-center gap-2 text-2xl font-bold text-slate-900">
                 <LayoutGrid className="h-5 w-5 text-teal-700" /> {overview?.applications.length ?? 0}
               </p>
             </div>
             <div className="rounded-xl border border-teal-100 bg-teal-50/60 p-3">
-              <p className="text-xs uppercase tracking-wider text-teal-700">Cross-sections</p>
+              <p className="text-xs uppercase tracking-wider text-teal-700">{t.crossSections}</p>
               <p className="mt-1 flex items-center gap-2 text-2xl font-bold text-slate-900">
                 <Ruler className="h-5 w-5 text-teal-700" /> {overview?.crossSections.length ?? 0}
               </p>
@@ -217,7 +294,7 @@ function App() {
           <CardContent>
             <div className="grid gap-2 md:grid-cols-3">
               <Input
-                placeholder="Name / keyword"
+                placeholder={t.nameKeyword}
                 value={filters.q}
                 onChange={(e) => setFilters((f) => ({ ...f, q: e.target.value }))}
               />
@@ -226,7 +303,7 @@ function App() {
                 value={filters.applicationId}
                 onChange={(e) => setFilters((f) => ({ ...f, applicationId: e.target.value }))}
               >
-                <option value="">Application</option>
+                <option value="">{t.application}</option>
                 {overview?.applications.map((a) => (
                   <option key={a.id} value={a.id}>{a.name}</option>
                 ))}
@@ -236,7 +313,7 @@ function App() {
                 value={filters.crossSectionId}
                 onChange={(e) => setFilters((f) => ({ ...f, crossSectionId: e.target.value }))}
               >
-                <option value="">Cross-section</option>
+                <option value="">{t.crossSection}</option>
                 {overview?.crossSections.map((c) => (
                   <option key={c.id} value={c.id}>{c.name}</option>
                 ))}
@@ -246,18 +323,18 @@ function App() {
                 value={filters.supplierId}
                 onChange={(e) => setFilters((f) => ({ ...f, supplierId: e.target.value }))}
               >
-                <option value="">Supplier</option>
+                <option value="">{t.supplier}</option>
                 {suppliers.map((s) => (
                   <option key={s.id} value={s.id}>{s.name}</option>
                 ))}
               </select>
               <Input
-                placeholder="Material"
+                placeholder={t.material}
                 value={filters.material}
                 onChange={(e) => setFilters((f) => ({ ...f, material: e.target.value }))}
               />
               <Input
-                placeholder="Dimensions"
+                placeholder={t.dimensions}
                 value={filters.dimensions}
                 onChange={(e) => setFilters((f) => ({ ...f, dimensions: e.target.value }))}
               />
@@ -267,18 +344,18 @@ function App() {
 
         <Card className="mb-4 overflow-hidden rounded-2xl border-slate-200 bg-white/95">
           <CardHeader>
-            <CardTitle>Profile Catalog</CardTitle>
+            <CardTitle>{t.profileCatalog}</CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[980px] border-collapse text-sm">
                 <thead className="bg-slate-100 text-left text-slate-700">
                   <tr>
-                    <th className="px-3 py-3 font-semibold">Drawing</th>
-                    <th className="px-3 py-3 font-semibold">Description</th>
-                    <th className="px-3 py-3 font-semibold">Application</th>
-                    <th className="px-3 py-3 font-semibold">Visual</th>
-                    <th className="px-3 py-3 font-semibold">Contact</th>
+                    <th className="px-3 py-3 font-semibold">{t.drawing}</th>
+                    <th className="px-3 py-3 font-semibold">{t.description}</th>
+                    <th className="px-3 py-3 font-semibold">{t.applicationCol}</th>
+                    <th className="px-3 py-3 font-semibold">{t.visual}</th>
+                    <th className="px-3 py-3 font-semibold">{t.contact}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -366,14 +443,14 @@ function App() {
 
         <Card className="rounded-2xl border-slate-200 bg-white/95">
           <CardHeader>
-            <CardTitle>Profile Detail Sheet</CardTitle>
+            <CardTitle>{t.profileDetailSheet}</CardTitle>
           </CardHeader>
           <CardContent>
-            {!detail && <p>Select a profile from the table.</p>}
+            {!detail && <p>{t.selectProfile}</p>}
             {detail && (
               <div className="grid gap-4 lg:grid-cols-[1.3fr_1fr]">
                 <div className="overflow-hidden rounded-xl border bg-white">
-                  <div className="border-b bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-700">Technical View</div>
+                  <div className="border-b bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-700">{t.technicalView}</div>
                   <div className="grid gap-3 p-4 md:grid-cols-[220px_1fr]">
                     <div className="h-[210px] overflow-hidden rounded-lg border bg-slate-50">
                       {safeUrl(detail.drawingUrl) ? (
@@ -387,13 +464,13 @@ function App() {
                     <div>
                       <table className="w-full text-sm">
                         <tbody>
-                          <tr className="border-b"><td className="py-2 font-semibold text-slate-700">Bezeichnung</td><td className="py-2 text-slate-900">{detail.name}</td></tr>
-                          <tr className="border-b"><td className="py-2 font-semibold text-slate-700">Masse</td><td className="py-2 text-slate-900">{detail.dimensions || '-'}</td></tr>
-                          <tr className="border-b"><td className="py-2 font-semibold text-slate-700">Gewicht kg/m</td><td className="py-2 text-slate-900">{detail.weightPerMeter ?? '-'}</td></tr>
-                          <tr className="border-b"><td className="py-2 font-semibold text-slate-700">Material</td><td className="py-2 text-slate-900">{detail.material || '-'}</td></tr>
-                          <tr className="border-b"><td className="py-2 font-semibold text-slate-700">Lange</td><td className="py-2 text-slate-900">{detail.lengthMm ? `${detail.lengthMm} mm` : '-'}</td></tr>
-                          <tr className="border-b"><td className="py-2 font-semibold text-slate-700">Anwendung</td><td className="py-2 text-slate-900">{detail.usage || '-'}</td></tr>
-                          <tr><td className="py-2 font-semibold text-slate-700">Status</td><td className="py-2"><span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${statusStyle(detail.status)}`}>{detail.status}</span></td></tr>
+                          <tr className="border-b"><td className="py-2 font-semibold text-slate-700">{t.designation}</td><td className="py-2 text-slate-900">{detail.name}</td></tr>
+                          <tr className="border-b"><td className="py-2 font-semibold text-slate-700">{t.masse}</td><td className="py-2 text-slate-900">{detail.dimensions || '-'}</td></tr>
+                          <tr className="border-b"><td className="py-2 font-semibold text-slate-700">{t.weightPerMeter}</td><td className="py-2 text-slate-900">{detail.weightPerMeter ?? '-'}</td></tr>
+                          <tr className="border-b"><td className="py-2 font-semibold text-slate-700">{t.material}</td><td className="py-2 text-slate-900">{detail.material || '-'}</td></tr>
+                          <tr className="border-b"><td className="py-2 font-semibold text-slate-700">{t.length}</td><td className="py-2 text-slate-900">{detail.lengthMm ? `${detail.lengthMm} mm` : '-'}</td></tr>
+                          <tr className="border-b"><td className="py-2 font-semibold text-slate-700">{t.usage}</td><td className="py-2 text-slate-900">{detail.usage || '-'}</td></tr>
+                          <tr><td className="py-2 font-semibold text-slate-700">{t.status}</td><td className="py-2"><span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${statusStyle(detail.status)}`}>{detail.status}</span></td></tr>
                         </tbody>
                       </table>
                     </div>
@@ -401,7 +478,7 @@ function App() {
                 </div>
 
                 <div className="overflow-hidden rounded-xl border bg-white">
-                  <div className="border-b bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-700">Supplier & Files</div>
+                  <div className="border-b bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-700">{t.supplierFiles}</div>
                   <div className="space-y-3 p-4 text-sm">
                     <div className="flex items-center gap-2">
                       <Building2 className="h-4 w-4 text-teal-700" />
@@ -426,36 +503,36 @@ function App() {
                       )}
                     </div>
                     <p className="text-slate-600">{detail.supplier?.address || '-'}</p>
-                    <p className="text-slate-600">Contact person: {detail.supplier?.contactPerson || '-'}</p>
+                    <p className="text-slate-600">{t.contactPerson}: {detail.supplier?.contactPerson || '-'}</p>
 
                     <div className="grid gap-2 pt-2">
                       {safeUrl(detail.drawingUrl) && (
                         <a href={detail.drawingUrl} target="_blank" rel="noreferrer">
                           <Button className="w-full justify-between" variant="outline">
-                            Open Drawing <ExternalLink className="h-4 w-4" />
+                            {t.openDrawing} <ExternalLink className="h-4 w-4" />
                           </Button>
                         </a>
                       )}
                       {safeUrl(detail.photoUrl) && (
                         <a href={detail.photoUrl} target="_blank" rel="noreferrer">
                           <Button className="w-full justify-between" variant="outline">
-                            Open Photo <ExternalLink className="h-4 w-4" />
+                            {t.openPhoto} <ExternalLink className="h-4 w-4" />
                           </Button>
                         </a>
                       )}
                       {safeUrl(detail.logoUrl) && (
                         <a href={detail.logoUrl} target="_blank" rel="noreferrer">
                           <Button className="w-full justify-between" variant="outline">
-                            Open Logo <ExternalLink className="h-4 w-4" />
+                            {t.openLogo} <ExternalLink className="h-4 w-4" />
                           </Button>
                         </a>
                       )}
                     </div>
 
                     <div className="rounded-lg border border-teal-100 bg-teal-50/70 p-3 text-xs text-teal-900">
-                      <p className="mb-1 flex items-center gap-1 font-semibold"><BadgeCheck className="h-3 w-3" /> Linked Categories</p>
-                      <p>Applications: {(detail.applications ?? []).map((item) => item.name).join(', ') || '-'}</p>
-                      <p>Cross-sections: {(detail.crossSections ?? []).map((item) => item.name).join(', ') || '-'}</p>
+                      <p className="mb-1 flex items-center gap-1 font-semibold"><BadgeCheck className="h-3 w-3" /> {t.linkedCategories}</p>
+                      <p>{t.applications}: {(detail.applications ?? []).map((item) => item.name).join(', ') || '-'}</p>
+                      <p>{t.crossSections}: {(detail.crossSections ?? []).map((item) => item.name).join(', ') || '-'}</p>
                     </div>
                   </div>
                 </div>
