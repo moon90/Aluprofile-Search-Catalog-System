@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '../../node_modules/.prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
 type Lang = 'en' | 'de';
@@ -57,30 +56,45 @@ export class PublicService {
   }
 
   async getOverview(lang: Lang) {
-    const [applications, crossSections, newestProfiles, rawProfileCount] =
-      await Promise.all([
-        this.prisma.application.findMany({
-          orderBy: { name: 'asc' },
-          include: { _count: { select: { profiles: true } } },
-        }),
-        this.prisma.crossSection.findMany({
-          orderBy: { name: 'asc' },
-          include: { _count: { select: { profiles: true } } },
-        }),
-        this.prisma.profile.findMany({
-          take: 8,
-          orderBy: { createdAt: 'desc' },
-          include: { supplier: true, applications: true, crossSections: true },
-        }),
-        this.prisma.$queryRaw<{ count: number }[]>(
-          Prisma.sql`SELECT COUNT(*)::int AS count FROM "Profile"`,
-        ),
-      ]);
+    const publicProfilesWhere = { ownerClerkUserId: null };
+    const [applications, crossSections, newestProfiles, totalProfiles] = await Promise.all([
+      this.prisma.application.findMany({
+        where: { profiles: { some: publicProfilesWhere } },
+        orderBy: { name: 'asc' },
+        include: {
+          _count: {
+            select: {
+              profiles: {
+                where: publicProfilesWhere,
+              },
+            },
+          },
+        },
+      }),
+      this.prisma.crossSection.findMany({
+        where: { profiles: { some: publicProfilesWhere } },
+        orderBy: { name: 'asc' },
+        include: {
+          _count: {
+            select: {
+              profiles: {
+                where: publicProfilesWhere,
+              },
+            },
+          },
+        },
+      }),
+      this.prisma.profile.findMany({
+        where: publicProfilesWhere,
+        take: 8,
+        orderBy: { createdAt: 'desc' },
+        include: { supplier: true, applications: true, crossSections: true },
+      }),
+      this.prisma.profile.count({ where: publicProfilesWhere }),
+    ]);
 
     return {
-      totals: {
-        profiles: rawProfileCount[0]?.count ?? 0,
-      },
+      totals: { profiles: totalProfiles },
       applications: applications.map((item) => this.localizeOption(lang, item)),
       crossSections: crossSections.map((item) => this.localizeOption(lang, item)),
       newestProfiles: newestProfiles.map((item) => this.localizeProfile(lang, item)),
@@ -88,7 +102,7 @@ export class PublicService {
   }
 
   async getProfiles(filters: ProfileFilters, lang: Lang) {
-    const where: any = {};
+    const where: any = { ownerClerkUserId: null };
     const and: any[] = [];
 
     if (filters.q) {
@@ -141,8 +155,8 @@ export class PublicService {
   }
 
   async getProfileById(id: number, lang: Lang) {
-    const profile = await this.prisma.profile.findUnique({
-      where: { id },
+    const profile = await this.prisma.profile.findFirst({
+      where: { id, ownerClerkUserId: null },
       include: {
         supplier: true,
         applications: true,

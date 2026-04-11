@@ -65,6 +65,7 @@ const TXT = {
     search: 'Search',
     language: 'Language',
     adminPanel: 'Admin Panel',
+    customerLogin: 'Login',
     totalProfiles: 'Total Profiles',
     applications: 'Applications',
     crossSections: 'Cross-sections',
@@ -139,6 +140,7 @@ const TXT = {
     search: 'Suche',
     language: 'Sprache',
     adminPanel: 'Admin-Panel',
+    customerLogin: 'Login',
     totalProfiles: 'Gesamtprofile',
     applications: 'Anwendungen',
     crossSections: 'Querschnitte',
@@ -458,6 +460,9 @@ function App() {
 
             <div className="public-hero-side">
               <div className="public-action-cluster">
+                <a href="/customer">
+                  <Button className="h-12 rounded-full px-6" variant="secondary">{t.customerLogin}</Button>
+                </a>
                 <SignedIn>
                   <a href="/admin">
                     <Button className="h-12 rounded-full px-6" variant="secondary">{t.adminPanel}</Button>
@@ -506,7 +511,7 @@ function App() {
           </div>
         </header>
 
-        {message && <p className="mb-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 shadow-[0_16px_32px_-28px_rgba(239,68,68,0.55)]">{message}</p>}
+        {message && <div className="app-feedback app-feedback-error">{message}</div>}
 
         <Card className="material-panel mb-6 overflow-hidden">
           <CardHeader className="border-b border-slate-100 bg-gradient-to-r from-white via-white to-slate-50/80">
@@ -892,4 +897,8 @@ function App() {
 }
 
 export default App;
+
+
+
+
 

@@ -391,9 +391,7 @@ export default function ClerkUsersPanel({ canManageUsers, lang }: Props) {
       </CardHeader>
       <CardContent className="space-y-5 pt-6">
         {toast && (
-          <div className={`rounded-2xl border px-4 py-3 text-sm shadow-[0_14px_30px_-26px_rgba(15,23,42,0.35)] ${toast.kind === 'error' ? 'border-red-200 bg-red-50 text-red-700' : 'border-emerald-200 bg-emerald-50 text-emerald-700'}`}>
-            {toast.text}
-          </div>
+          <div className={`app-feedback ${toast.kind === 'error' ? 'app-feedback-error' : 'app-feedback-success'}`}>{toast.text}</div>
         )}
 
         <div className="rounded-[1.4rem] border border-slate-200 bg-slate-50/80 p-4">

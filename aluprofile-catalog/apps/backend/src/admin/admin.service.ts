@@ -145,17 +145,25 @@ export class AdminService {
   async updateClerkUser(
     userId: string,
     input: {
+      email?: string;
       password?: string;
       firstName?: string;
       lastName?: string;
       username?: string;
     },
   ) {
+    const existing = await this.clerkClient.users.getUser(userId);
     const payload: Record<string, unknown> = {
       firstName: input.firstName?.trim() || undefined,
       lastName: input.lastName?.trim() || undefined,
       username: input.username?.trim() || undefined,
     };
+
+    const email = input.email?.trim();
+    if (email) {
+      payload.primaryEmailAddressID = existing.primaryEmailAddressId;
+      payload.emailAddress = [email];
+    }
 
     const password = input.password?.trim();
     if (password) {

@@ -50,6 +50,10 @@ export class AuthService {
     return { clerkUserId };
   }
 
+  async verifyCustomer(token: string) {
+    return this.verifyIdentity(token);
+  }
+
   async verify(token: string) {
     const { clerkUserId } = await this.verifyIdentity(token);
 

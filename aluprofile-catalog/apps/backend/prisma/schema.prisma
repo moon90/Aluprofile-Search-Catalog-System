@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,56 +8,57 @@ datasource db {
 }
 
 model Profile {
-  id              Int            @id @default(autoincrement())
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
-  name            String         @unique
-  nameDe          String?
-  description     String?
-  descriptionDe   String?
-  usage           String?
-  usageDe         String?
-  drawingUrl      String?
-  photoUrl        String?
-  logoUrl         String?
-  dimensions      String?
-  weightPerMeter  Float?
-  material        String?
-  materialDe      String?
-  lengthMm        Int?
-  status          Status         @default(AVAILABLE)
+  id               Int            @id @default(autoincrement())
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  name             String         @unique
+  nameDe           String?
+  description      String?
+  descriptionDe    String?
+  usage            String?
+  usageDe          String?
+  drawingUrl       String?
+  photoUrl         String?
+  logoUrl          String?
+  dimensions       String?
+  weightPerMeter   Float?
+  material         String?
+  materialDe       String?
+  lengthMm         Int?
+  status           Status         @default(AVAILABLE)
+  ownerClerkUserId String?
+  supplierId       Int
+  supplier         Supplier       @relation(fields: [supplierId], references: [id])
+  applications     Application[]  @relation("ApplicationToProfile")
+  crossSections    CrossSection[] @relation("CrossSectionToProfile")
 
-  supplierId      Int
-  supplier        Supplier       @relation(fields: [supplierId], references: [id])
-
-  applications    Application[]  @relation("ApplicationToProfile")
-  crossSections   CrossSection[] @relation("CrossSectionToProfile")
+  @@index([ownerClerkUserId])
 }
 
 model Supplier {
-  id              Int       @id @default(autoincrement())
-  name            String    @unique
-  nameDe          String?
-  address         String?
-  contactPerson   String?
-  email           String?
-  phone           String?
-  website         String?
-  profiles        Profile[]
+  id            Int       @id @default(autoincrement())
+  name          String    @unique
+  nameDe        String?
+  address       String?
+  contactPerson String?
+  email         String?
+  phone         String?
+  website       String?
+  profiles      Profile[]
 }
 
 model Application {
-  id        Int       @id @default(autoincrement())
-  name      String    @unique
-  nameDe    String?
-  profiles  Profile[] @relation("ApplicationToProfile")
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  nameDe   String?
+  profiles Profile[] @relation("ApplicationToProfile")
 }
 
 model CrossSection {
-  id        Int       @id @default(autoincrement())
-  name      String    @unique
-  nameDe    String?
-  profiles  Profile[] @relation("CrossSectionToProfile")
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  nameDe   String?
+  profiles Profile[] @relation("CrossSectionToProfile")
 }
 
 model UserAccess {

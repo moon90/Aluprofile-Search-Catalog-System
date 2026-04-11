@@ -386,6 +386,7 @@ function AdminPage() {
   const { user } = useUser();
   const { isLoaded: isSignInLoaded, signIn, setActive } = useSignIn();
   const [message, setMessage] = useState('');
+  const [messageKind, setMessageKind] = useState<'error' | 'success'>('error');
   const [lang, setLang] = useState<Lang>('en');
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
@@ -468,6 +469,11 @@ function AdminPage() {
 
   const t = TXT[lang];
 
+  function showMessage(text: string, kind: 'error' | 'success' = 'error') {
+    setMessageKind(kind);
+    setMessage(text);
+  }
+
   useEffect(() => {
     const saved = window.localStorage.getItem('aluprofile_lang');
     if (saved === 'en' || saved === 'de') setLang(saved);
@@ -525,7 +531,7 @@ function AdminPage() {
       await setActive({ session: result.createdSessionId });
       window.location.assign('/admin');
     } catch (error) {
-      setMessage(parseAuthError(error));
+      showMessage(parseAuthError(error), 'error');
     } finally {
       setLoginLoading(false);
     }
@@ -560,9 +566,9 @@ function AdminPage() {
         identifier: identifier.trim(),
       });
       setForgotPasswordStep('verify');
-      setMessage(t.resetPasswordSent);
+      showMessage(t.resetPasswordSent, 'success');
     } catch (error) {
-      setMessage(parseAuthError(error));
+      showMessage(parseAuthError(error), 'error');
     } finally {
       setForgotPasswordLoading(false);
     }
@@ -701,7 +707,7 @@ function AdminPage() {
       await setActive({ session: result.createdSessionId });
       window.location.assign('/admin');
     } catch (error) {
-      setMessage(parseAuthError(error));
+      showMessage(parseAuthError(error), 'error');
     } finally {
       setForgotPasswordLoading(false);
     }
@@ -755,15 +761,15 @@ function AdminPage() {
   }
 
   useEffect(() => {
-    loadAuthContext().catch((err) => setMessage(String(err)));
+    loadAuthContext().catch((err) => showMessage(String(err), 'error'));
   }, [isSignedIn]);
 
   useEffect(() => {
-    adminLoad().catch((err) => canViewAdmin && setMessage(String(err)));
+    adminLoad().catch((err) => canViewAdmin && showMessage(String(err), 'error'));
   }, [canViewAdmin, canManageProfiles]);
 
   useEffect(() => {
-    loadUserAccess().catch((err) => canManageUsers && setMessage(String(err)));
+    loadUserAccess().catch((err) => canManageUsers && showMessage(String(err), 'error'));
   }, [canManageUsers]);
 
   async function uploadFile(file: File) {
@@ -986,7 +992,7 @@ function AdminPage() {
         </header>
         )}
 
-        {message && <p className="mb-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 shadow-[0_16px_32px_-28px_rgba(239,68,68,0.55)]">{message}</p>}
+        {message && <div className={`app-feedback ${messageKind === 'error' ? 'app-feedback-error' : 'app-feedback-success'}`}>{message}</div>}
 
         <main className="grid gap-6 xl:grid-cols-[280px_minmax(0,1fr)]">
           <SignedOut>

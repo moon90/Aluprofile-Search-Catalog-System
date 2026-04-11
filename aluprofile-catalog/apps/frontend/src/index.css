@@ -115,6 +115,20 @@
   .material-chip {
     @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold;
   }
+
+  .app-feedback {
+    @apply mb-4 flex min-h-[3.75rem] w-full items-center justify-center rounded-[1.35rem] border px-5 py-4 text-center text-sm font-medium leading-6 shadow-[0_18px_38px_-30px_rgba(15,23,42,0.35)] backdrop-blur-sm;
+  }
+
+  .app-feedback-error {
+    background: linear-gradient(135deg, rgba(254, 242, 242, 0.98), rgba(255, 255, 255, 0.96));
+    @apply border-red-200 text-red-700;
+  }
+
+  .app-feedback-success {
+    background: linear-gradient(135deg, rgba(236, 253, 245, 0.98), rgba(255, 255, 255, 0.96));
+    @apply border-emerald-200 text-emerald-700;
+  }
 }
 
 @layer components {

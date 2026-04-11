@@ -6,3 +6,7 @@ export type AuthContext = {
   appPermissions: AppPermission[];
   source: 'database' | 'bootstrap';
 };
+
+export type CustomerAuthContext = {
+  clerkUserId: string;
+};
