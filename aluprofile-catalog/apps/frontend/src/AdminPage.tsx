@@ -787,72 +787,107 @@ function AdminPage() {
 
   async function saveSupplier() {
     if (!supplierForm.name) return;
-    const method = editType === 'supplier' && editId ? 'PUT' : 'POST';
-    const path = method === 'PUT' ? '/admin/suppliers/' + editId : '/admin/suppliers';
-    await api(path, { method, body: JSON.stringify(supplierForm) }, true);
-    resetSupplierForm();
-    setSupplierPage(1);
-    await adminLoad();
+    try {
+      const method = editType === 'supplier' && editId ? 'PUT' : 'POST';
+      const path = method === 'PUT' ? '/admin/suppliers/' + editId : '/admin/suppliers';
+      await api(path, { method, body: JSON.stringify(supplierForm) }, true);
+      resetSupplierForm();
+      setSupplierPage(1);
+      await adminLoad();
+      showMessage('Supplier saved successfully', 'success');
+    } catch (error) {
+      showMessage(String(error), 'error');
+    }
   }
 
   async function saveApplication() {
     if (!applicationName) return;
-    const method = editType === 'application' && editId ? 'PUT' : 'POST';
-    const path = method === 'PUT' ? '/admin/applications/' + editId : '/admin/applications';
-    await api(path, { method, body: JSON.stringify({ name: applicationName, nameDe: applicationNameDe || undefined }) }, true);
-    resetApplicationForm();
-    setApplicationPage(1);
-    await adminLoad();
+    try {
+      const method = editType === 'application' && editId ? 'PUT' : 'POST';
+      const path = method === 'PUT' ? '/admin/applications/' + editId : '/admin/applications';
+      await api(path, { method, body: JSON.stringify({ name: applicationName, nameDe: applicationNameDe || undefined }) }, true);
+      resetApplicationForm();
+      setApplicationPage(1);
+      await adminLoad();
+      showMessage('Application saved successfully', 'success');
+    } catch (error) {
+      showMessage(String(error), 'error');
+    }
   }
 
   async function saveCrossSection() {
     if (!crossSectionName) return;
-    const method = editType === 'cross' && editId ? 'PUT' : 'POST';
-    const path = method === 'PUT' ? '/admin/cross-sections/' + editId : '/admin/cross-sections';
-    await api(path, { method, body: JSON.stringify({ name: crossSectionName, nameDe: crossSectionNameDe || undefined }) }, true);
-    resetCrossSectionForm();
-    setCrossSectionPage(1);
-    await adminLoad();
+    try {
+      const method = editType === 'cross' && editId ? 'PUT' : 'POST';
+      const path = method === 'PUT' ? '/admin/cross-sections/' + editId : '/admin/cross-sections';
+      await api(path, { method, body: JSON.stringify({ name: crossSectionName, nameDe: crossSectionNameDe || undefined }) }, true);
+      resetCrossSectionForm();
+      setCrossSectionPage(1);
+      await adminLoad();
+      showMessage('Cross-section saved successfully', 'success');
+    } catch (error) {
+      showMessage(String(error), 'error');
+    }
   }
 
   async function saveProfile() {
-    const method = editType === 'profile' && editId ? 'PUT' : 'POST';
-    const path = method === 'PUT' ? '/admin/profiles/' + editId : '/admin/profiles';
-    await api(path, {
-      method,
-      body: JSON.stringify({
-        ...profileForm,
-        supplierId: Number(profileForm.supplierId),
-      }),
-    }, true);
-    resetProfileForm();
-    setProfilePage(1);
-    await adminLoad();
+    try {
+      const method = editType === 'profile' && editId ? 'PUT' : 'POST';
+      const path = method === 'PUT' ? '/admin/profiles/' + editId : '/admin/profiles';
+      await api(path, {
+        method,
+        body: JSON.stringify({
+          ...profileForm,
+          supplierId: Number(profileForm.supplierId),
+        }),
+      }, true);
+      resetProfileForm();
+      setProfilePage(1);
+      await adminLoad();
+      showMessage('Profile saved successfully', 'success');
+    } catch (error) {
+      showMessage(String(error), 'error');
+    }
   }
 
   const deleteItem = async (path: string) => {
-    await api(path, { method: 'DELETE' }, true);
-    await adminLoad();
+    try {
+      await api(path, { method: 'DELETE' }, true);
+      await adminLoad();
+      showMessage('Item deleted successfully', 'success');
+    } catch (error) {
+      showMessage(String(error), 'error');
+    }
   };
 
   async function saveUserAccess() {
     if (!userAccessForm.clerkUserId.trim()) return;
-    await api('/admin/user-access', {
-      method: 'POST',
-      body: JSON.stringify({
-        clerkUserId: userAccessForm.clerkUserId.trim(),
-        role: userAccessForm.role,
-        permissions: userAccessForm.permissions,
-      }),
-    }, true);
-    resetRoleForm();
-    setRolePage(1);
-    await loadUserAccess();
+    try {
+      await api('/admin/user-access', {
+        method: 'POST',
+        body: JSON.stringify({
+          clerkUserId: userAccessForm.clerkUserId.trim(),
+          role: userAccessForm.role,
+          permissions: userAccessForm.permissions,
+        }),
+      }, true);
+      resetRoleForm();
+      setRolePage(1);
+      await loadUserAccess();
+      showMessage('Access rule saved successfully', 'success');
+    } catch (error) {
+      showMessage(String(error), 'error');
+    }
   }
 
   async function deleteUserAccess(clerkUserId: string) {
-    await api('/admin/user-access/' + encodeURIComponent(clerkUserId), { method: 'DELETE' }, true);
-    await loadUserAccess();
+    try {
+      await api('/admin/user-access/' + encodeURIComponent(clerkUserId), { method: 'DELETE' }, true);
+      await loadUserAccess();
+      showMessage('Access rule deleted successfully', 'success');
+    } catch (error) {
+      showMessage(String(error), 'error');
+    }
   }
 
   async function seedDemoData() {

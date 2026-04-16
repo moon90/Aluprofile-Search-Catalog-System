@@ -630,6 +630,7 @@ function CustomerPage() {
       lengthMm: profileForm.lengthMm || undefined,
     };
     try {
+      const isCreate = !editId;
       if (editId) {
         await authedApi(`/customer/profiles/${editId}`, {
           method: 'PUT',
@@ -643,6 +644,7 @@ function CustomerPage() {
       }
       await loadCustomerData();
       resetProfileForm();
+      showMessage('Profile saved successfully', 'success');
     } catch (error) {
       showMessage(parseApiError(error), 'error');
     } finally {
@@ -655,6 +657,7 @@ function CustomerPage() {
       await authedApi(`/customer/profiles/${id}`, { method: 'DELETE' });
       await loadCustomerData();
       if (editId === id) resetProfileForm();
+      showMessage('Profile deleted successfully', 'success');
     } catch (error) {
       showMessage(parseApiError(error), 'error');
     }
