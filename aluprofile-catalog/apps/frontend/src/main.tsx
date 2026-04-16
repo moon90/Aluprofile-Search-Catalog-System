@@ -19,8 +19,19 @@ const page = pathname === '/admin' ? <AdminPage /> : pathname === '/customer' ? 
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ClerkProvider publishableKey={publishableKey}>
+    <ClerkProvider
+      publishableKey={publishableKey}
+      appearance={{
+        elements: {
+          footer: 'hidden',
+          footerAction: 'hidden',
+          userButtonPopoverFooter: 'hidden',
+        },
+      }}
+    >
       {page}
     </ClerkProvider>
   </StrictMode>,
 );
+
+
