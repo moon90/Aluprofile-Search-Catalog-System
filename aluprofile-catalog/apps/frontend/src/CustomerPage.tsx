@@ -630,7 +630,6 @@ function CustomerPage() {
       lengthMm: profileForm.lengthMm || undefined,
     };
     try {
-      const isCreate = !editId;
       if (editId) {
         await authedApi(`/customer/profiles/${editId}`, {
           method: 'PUT',
