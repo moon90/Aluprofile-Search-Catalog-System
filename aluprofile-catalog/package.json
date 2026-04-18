@@ -9,7 +9,6 @@
     "backend:build": "npm --workspace apps/backend run build",
     "frontend:build": "npm --workspace apps/frontend run build",
     "build": "npm run backend:build",
-    "postinstall": "npm --workspace apps/backend run prisma:generate",
     "start": "npm --workspace apps/backend run start:prod"
   },
   "keywords": [],
