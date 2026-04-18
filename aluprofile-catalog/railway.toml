@@ -1,0 +1,8 @@
+[build]
+builder = "nixpacks"
+buildCommand = "npm run backend:build"
+
+[deploy]
+startCommand = "npm --workspace apps/backend run start:prod"
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3
